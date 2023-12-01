@@ -39,8 +39,16 @@ def trebuchet2(line):
     return numbers and (word_to_int(numbers[0])*10 + word_to_int(numbers[-1])) or 0
     
 def main():
+    stage = trebuchet1
     import sys
-    print(sum(map(trebuchet2, sys.stdin)))
+    if len(sys.argv) > 1:
+        if sys.argv[1] == '1':
+            stage = trebuchet1
+        elif sys.argv[1] == '2':
+            stage = trebuchet2
+        else:
+            return
+    print(sum(map(stage, sys.stdin)))
 
 if __name__=='__main__':
     main()
