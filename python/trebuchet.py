@@ -31,11 +31,12 @@ def find_all_overlapping(exp,line):
         start = match.start() + 1
 
 def trebuchet1(line):
+    line = line.lower()
     return int(safe_search(NUM.search(line)) + safe_search(NUM.search(line[::-1])))
 
 def trebuchet2(line):
     # My first attempt here used `findall` but failed on 'eightwo'
-    numbers = list(find_all_overlapping(NUM_WORDS, line))
+    numbers = list(find_all_overlapping(NUM_WORDS, line.lower()))
     return numbers and (word_to_int(numbers[0])*10 + word_to_int(numbers[-1])) or 0
     
 def main():
