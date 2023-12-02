@@ -1,7 +1,7 @@
 # Advent of Code 2023
 # Day one task: Trepuchet?!
 
-import sys
+from adventofcode import AdventOfCode
 import re
 
 NUM = re.compile('\\d')
@@ -30,14 +30,18 @@ def find_all_overlapping(exp,line):
         yield match.group(0)
         start = match.start() + 1
 
-def trebuchet1(line):
-    line = line.lower()
-    return int(safe_search(NUM.search(line)) + safe_search(NUM.search(line[::-1])))
+class trebuchet1(AdventOfCode):
 
-def trebuchet2(line):
-    # My first attempt here used `findall` but failed on 'eightwo'
-    numbers = list(find_all_overlapping(NUM_WORDS, line.lower()))
-    return numbers and (word_to_int(numbers[0])*10 + word_to_int(numbers[-1])) or 0
+    def line(self, line):
+        line = line.lower()
+        return int(safe_search(NUM.search(line)) + safe_search(NUM.search(line[::-1])))
+
+class trebuchet2(AdventOfCode):
+
+    def line(self, line):
+        # My first attempt here used `findall` but failed on 'eightwo'
+        numbers = list(find_all_overlapping(NUM_WORDS, line.lower()))
+        return numbers and (word_to_int(numbers[0])*10 + word_to_int(numbers[-1])) or 0
     
 def main():
     stage = trebuchet1
@@ -49,7 +53,7 @@ def main():
             stage = trebuchet2
         else:
             return
-    print(sum(map(stage, sys.stdin)))
+    print(stage(sys.stdin).reduce_lines(sum))
 
 if __name__=='__main__':
     main()
