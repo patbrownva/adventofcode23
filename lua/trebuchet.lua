@@ -35,12 +35,11 @@ function trebuchet1 (line)
 end
 
 local number_words = {
-    'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'zero', '%d'
+    'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', [0]='zero', '%d'
 }
 local function word_to_number (word)
     local num = tonumber(word)
     if num then return num end
-    if word == 'zero' then return 0 end
     return aoc.index(number_words, word)
 end
 
