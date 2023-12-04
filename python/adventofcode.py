@@ -18,3 +18,14 @@ class AdventOfCode:
         if collector is sum and (initial is None or initial == 0):
             return sum(lines)
         return reduce(collector, lines, initial)
+
+    @staticmethod
+    def reduce_and_sum(stages, *args):
+        stage = stages[0]
+        import sys
+        if len(sys.argv) > 1:
+            try:
+                stage = stages[int(sys.argv[1])-1]
+            except:
+                return
+        return stage(sys.stdin, *args).reduce_lines(sum)
