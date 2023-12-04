@@ -8,7 +8,7 @@ function list_of_nums(line)
     return list
 end
 
-function union(left, right)
+function intersect(left, right)
     local source = {}
     for _, item in ipairs(left) do
         source[item] = 1
@@ -21,24 +21,22 @@ function union(left, right)
 end
 
 function card(line)
-    local card_num = line:match("Card( *%d+):")
-    line = line:sub(6+#card_num)
-    local split = line:find('|')
-    return tonumber(card_num), list_of_nums(line:sub(1,split-1)), list_of_nums(line:sub(split+1))
+    local card_num, left, right = line:match("Card *(%d+):([^|]+)|(.*)")
+    return tonumber(card_num), list_of_nums(left), list_of_nums(right)
 end
 
 local CARDS = {}
 
 function scratchcards1(line)
     local card_num, winning, drawn = card(line)
-    local matches = union(winning, drawn)
+    local matches = intersect(winning, drawn)
     return #matches > 0 and math.tointeger(2^(#matches-1)) or 0
 end
 
 function scratchcards2(line)
     local card_num, winning, drawn = card(line)
     CARDS[card_num] = (CARDS[card_num] or 0) + 1
-    local matches = union(winning, drawn)
+    local matches = intersect(winning, drawn)
     if #matches > 0 then
         for win_card = card_num+1, card_num+#matches do
             CARDS[win_card] = (CARDS[win_card] or 0) + CARDS[card_num]
