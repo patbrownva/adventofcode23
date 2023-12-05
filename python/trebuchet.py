@@ -22,7 +22,7 @@ def word_to_int(word):
     return int(number_words.get(word,word))
 
 def safe_search(match):
-    return match and match.group(0) or ''
+    return match.group(0) if match else ''
 
 def find_all_overlapping(exp,line):
     start = 0
@@ -41,7 +41,7 @@ class trebuchet2(AdventOfCode):
     def line(self, line):
         # My first attempt here used `findall` but failed on 'eightwo'
         numbers = list(find_all_overlapping(NUM_WORDS, line.lower()))
-        return numbers and (word_to_int(numbers[0])*10 + word_to_int(numbers[-1])) or 0
+        return word_to_int(numbers[0])*10 + word_to_int(numbers[-1]) if numbers else 0
     
 def main():
     stage = trebuchet1

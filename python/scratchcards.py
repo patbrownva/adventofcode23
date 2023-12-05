@@ -12,7 +12,7 @@ class scratchcards1(AdventOfCode):
     def line(self, line):
         card,winning,drawn = self.card(line)
         matches = set(winning).intersection(drawn)
-        return matches and 2**(len(matches)-1) or 0
+        return 2**(len(matches)-1) if matches else 0
 
     def card(self, line):
         match = CARD.match(line)
