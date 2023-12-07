@@ -88,4 +88,9 @@ M.run_reduce_sum = function (stages, ...)
     print(M.reduce(lines, M.sum))
 end
 
+M.run = function (stages, ...)
+    local stage = stages[tonumber(arg[1]) or 1]
+    print(stage(...))
+end
+
 return M

@@ -13,6 +13,11 @@ class AdventOfCode:
     def line(self, line):
         pass
 
+    def read(self):
+        for line in self.input:
+            self.line(line)
+        return self
+
     def reduce_lines(self, collector, initial=None):
         lines = map(self.line, self.input)
         if collector is sum and (initial is None or initial == 0):
