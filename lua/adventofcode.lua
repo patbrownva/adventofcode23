@@ -1,11 +1,22 @@
 local M = {}
 
+local function gcd(m, n)
+    if n == 0 then
+        return m
+    end
+    return gcd(n, m % n)
+end
+M.gcd = gcd
+
+M.lcm = function (m, n)
+    return (m~=0 and n~=0) and m*n/gcd(m,n) or 0
+end
+
 M.sum = function (a, b)
     return (a or 0) + (b or 0)
 end
 
-M.reduce = function (T, F)
-    local R
+M.reduce = function (T, F, R)
     for _,v in pairs(T) do
         R = F(R, v)
     end
@@ -85,7 +96,7 @@ M.run_reduce_sum = function (stages, ...)
     for line in io.lines() do
         lines[#lines+1] = stage(line, ...)
     end
-    print(M.reduce(lines, M.sum))
+    print(M.reduce(lines, M.sum, 0))
 end
 
 M.run = function (stages, ...)
