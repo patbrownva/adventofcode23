@@ -23,6 +23,14 @@ M.reduce = function (T, F, R)
     return R
 end
 
+M.freduce = function (F, ...)
+    local function func (a, b, ...)
+        if b then return func(F(a,b), ...)
+        else return a end
+    end
+    return func(...)
+end
+
 M.map = function (T, F)
     local R = {}
     for k,v in pairs(T) do
@@ -40,7 +48,7 @@ end
 
 M.findall = function (S, pat)
     local R = {}
-    for M in string.gmatch(S, "%d+") do
+    for M in string.gmatch(S, pat) do
         R[#R+1] = M
     end
     return R
