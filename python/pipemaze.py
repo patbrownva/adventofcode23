@@ -73,14 +73,22 @@ class Maze:
                 yield Point(x,y)
 
     def inside(self, start):
-        count = 0
+        count = False
         row = self.maze[start.y]
         pipe = None
         x = start.x
         cols = range(x+1, len(row)) if len(row)-x < x else range(x)
-        span =''.join(self.get(Point(i,start.y)) for i in cols if Point(i, start.y) in self.pipes)
-        span = span.replace('-','').replace('L7','|').replace('FJ','|')
-        return span.count('|')%2 == 1
+        #span =''.join(self.get(Point(i,start.y)) for i in cols if Point(i, start.y) in self.pipes)
+        #span = span.replace('-','').replace('L7','|').replace('FJ','|')
+        #return span.count('|')%2 == 1
+        # A hint from the puzzle discussion enlightened me that 
+        # only walls crossed to one side need to be counted.
+        # Corners will be in pairs and mismatched pairs will change
+        # parity while matched corners stay on the same side.
+        for i in cols:
+            at = Point(i, start.y)
+            count ^= (at in self.pipes and self.get(at) in ('|','L','J'))
+        return count
 
 
 def pipemaze1(maze):

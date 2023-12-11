@@ -109,14 +109,45 @@ function mark(at, dir)
 end
 
 function pick_a_direction(start)
-    for _,dir in ipairs{'N','W','S','E'} do
-        local step = Direction[dir]
+    for dir,step in pairs(Direction) do
         local pipe = get(move(start, step))
         if Transform[pipe] and Transform[pipe][dir] then
             return dir
         end
     end
     error"Can't go anywhere!"
+end
+
+function inside(start)
+    if cover(start) == 'P' then
+        return false
+    end
+    local row = Map[start[2]]
+    local function _inside(at,dir)
+        local count = false
+        local pipe = get(at)
+        while pipe do
+            if pipe == 'S' then
+                dir[1] = -dir[1]
+                return _inside(move(start,dir), dir)
+            end
+            if cover(at) == 'P' then
+                if pipe == '|' or pipe == 'F' or pipe == '7' then
+                    count = not count
+                end
+            end
+            at = move(at, dir)
+            pipe = get(at)
+        end
+        return count
+    end
+    local dir
+    if start[1] <= #row-start[1] then
+        dir = {-1,0}
+    else
+        dir = {1,0}
+    end
+    return _inside(move(start,dir), dir)
 end
 
 local BORDER = {{-1,-1},{0,-1},{1,-1},{-1,0},{1,0},{-1,1},{0,1},{1,1}}
@@ -157,9 +188,23 @@ end
 
 function pipemaze2(start)
     pipemaze1(start)
+    local inmark, top
     for y = 1,#Map do
         for x = 1,#Map[y] do
-            if cover{x,y} == 'I' then
+            if cover{x,y} == 'I' or cover{x,y} == 'O' then
+                if inside{x,y} then
+                    inmark = cover{x,y}
+                    top = y
+                    goto foundmark
+                end
+            end
+        end
+    end
+    error"No marks found"
+    ::foundmark::
+    for y = top,#Map do
+        for x = 1,#Map[y] do
+            if cover{x,y} == inmark then
                 fill({x,y})
             end
         end
@@ -167,7 +212,7 @@ function pipemaze2(start)
     local count = 0
     for y = 1,#Map do
       for x = 1,#Map[y] do
-        if Coverage[y][x] == 'I' then
+        if Coverage[y][x] == inmark then
             count = count + 1
         end
       end
