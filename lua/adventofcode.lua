@@ -112,4 +112,92 @@ M.run = function (stages, ...)
     print(stage(...))
 end
 
+-- Point and Grid
+
+local point_mt
+local Point = function (x, y)
+    if y == nil then
+        x, y = x[1] or x.x, x[2] or x.y
+    end
+    return setmetatable({x=(x or 0), y=(y or 0)}, point_mt)
+end
+
+local point_field = { "x", "y", x="x", y="y", row="y", col="x", i="x", j="y", width="x", height="y" }
+point_mt = {
+    __index = function (this, name)
+        return rawget(this, point_field[name])
+    end;
+    __eq = function (this, val)
+        return this.x==val.x and this.y==val.y
+    end;
+    __lt = function (this, val)
+        return this.x<val.x or (this.x==val.x and this.y<val.y)
+    end;
+    __le = function (this, val)
+        return this.x<val.x or (this.x==val.x and this.y<=val.y)
+    end;
+    __add = function (this, val)
+        return Point(this.x+val.x, this.y+val.y)
+    end;
+    __sub = function (this, val)
+        return Point(this.x-val.x, this.y-val.y)
+    end;
+    __bnot = function (this)
+        return this.x==0 and this.y==0
+    end;
+    __tostring = function (this)
+        return string.format("Point(%q, %q)", this.x, this.y)
+    end;
+}
+
+M.Point = Point
+
+local grid_mt = {}
+
+grid_mt.__index = function (this, pt)
+    if grid_mt[pt] then
+        return grid_mt[pt]
+    end
+    local x,y = pt[1] or pt.x, pt[2] or pt.y
+    local row = this.grid[y]
+    return row and row[x]
+end
+
+grid_mt.next = function (this, pos)
+    if pos then
+        local y, x = pos.y, pos.x + 1
+        if x > this.width then
+            x, y = 1, y + 1
+        end
+        pos = Point(x, y)
+    else
+        pos = Point(1, 1)
+    end
+    if pos.y < 1 or pos.y > this.height or pos.x < 1 or pos.x > this.width then
+        return nil
+    end
+    return pos, this.grid[pos.y][pos.x]
+end
+
+grid_mt.each = function (this)
+    return grid_mt.next, this
+end
+
+M.Grid = function (input)
+    local substr = string.sub
+    local grid = {}
+    local width = 0
+    for line in input:lines() do
+        row = {}
+        for i = 1, #line do
+            row[i] = substr(line, i,i)
+        end
+        if #row > width then
+            width = #row
+        end
+        grid[#grid+1] = row
+    end
+    return setmetatable({grid=grid, height=#grid, width=width}, grid_mt)
+end
+
 return M
