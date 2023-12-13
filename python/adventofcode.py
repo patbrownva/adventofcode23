@@ -3,6 +3,19 @@
 from functools import reduce
 from dataclasses import dataclass
 
+def main(stages, *args, **kwargs):
+    import sys
+    stage = stages[0]
+    if len(sys.argv) > 1:
+        if sys.argv[1] == '1':
+            stage = stages[0]
+        elif sys.argv[1] == '2':
+            stage = stages[1]
+        else:
+            return
+    return stage(sys.stdin, *args, **kwargs)
+
+
 class AdventOfCode:
     """Framework for AoC-type problems.
     """
