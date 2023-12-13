@@ -100,7 +100,11 @@ class Grid:
     def __init__(self, inputfile):
         self.grid = []
         for line in inputfile:
-            self.grid.append(line.rstrip('\n'))
+            line = line.rstrip('\n')
+            if not line:
+                break
+            self.grid.append(line)
+        self.columns = [None for _ in range(self.width)]
 
     @property
     def height(self):
@@ -114,10 +118,23 @@ class Grid:
         if len(args) == 1:
             x,y = args[1]
         elif len(args) == 2:
-            x,y = args[:2]
+            x,y = args
         else:
             raise IndexError("bad Grid index")
-        return self.grid[y][x]
+        if x >= self.width:
+            raise IndexError("Grid index out of range")
+        return self.grid[y][x] if x < len(self.grid[y]) else None
+
+    def __setitem__(self, *args):
+        if len(args) == 2:
+            x,y = args[1]
+            v = args[2]
+        elif len(args) == 3:
+            x,y,v = args
+        else:
+            raise IndexError("bad Grid index")
+        self.grid[y][x] = v
+        self.columns[y] = None
 
     def each(self):
         for y in range(self.height):
@@ -137,3 +154,19 @@ class Grid:
                 return Point(foundX, y)
             startX = 0
         return None
+
+    def row(self, y):
+        return self.grid[y] if (0 <= y < self.height) else None
+
+    def column(self, x):
+        if 0 <= x < self.width:
+            if self.columns[x] is None:
+                self.columns[x] = ''.join(
+                    self.grid[y][x] if x < len(self.grid[y]) else None
+                    for y in range(self.height))
+            return self.columns[x]
+        return None
+
+    def transpose(self):
+        self.grid = [self.column(x) for x in range(self.width)]
+        self.columns = [None for _ in range(self.width)]
