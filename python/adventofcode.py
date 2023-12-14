@@ -1,7 +1,8 @@
 # Advent of Code general class 
 
-from functools import reduce
 from dataclasses import dataclass
+from functools import reduce
+from itertools import zip_longest
 
 def main(stages, *args, **kwargs):
     import sys
@@ -12,7 +13,7 @@ def main(stages, *args, **kwargs):
         elif sys.argv[1] == '2':
             stage = stages[1]
         else:
-            return
+            sys.exit()
     return stage(sys.stdin, *args, **kwargs)
 
 
@@ -133,8 +134,9 @@ class Grid:
             x,y,v = args
         else:
             raise IndexError("bad Grid index")
-        self.grid[y][x] = v
-        self.columns[y] = None
+        row = self.grid[y]
+        self.grid[y] = row[:x] + v + row[x+1:]
+        self.columns[x] = None
 
     def each(self):
         for y in range(self.height):
@@ -161,12 +163,12 @@ class Grid:
     def column(self, x):
         if 0 <= x < self.width:
             if self.columns[x] is None:
-                self.columns[x] = ''.join(
-                    self.grid[y][x] if x < len(self.grid[y]) else None
-                    for y in range(self.height))
+                self.columns[x] = ''.join(*zip_longest(
+                                    *(row[x:x+1] for row in self.grid), fillvalue=' '))
             return self.columns[x]
         return None
 
     def transpose(self):
-        self.grid = [self.column(x) for x in range(self.width)]
+        #self.grid = [self.column(x) for x in range(self.width)]
+        self.grid = [''.join(col) for col in zip_longest(*self.grid, fillvalue=' ')]
         self.columns = [None for _ in range(self.width)]
