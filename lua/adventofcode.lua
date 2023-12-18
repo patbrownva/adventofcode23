@@ -1,3 +1,6 @@
+local ipairs,pairs,getmetatable,setmetatable = ipairs,pairs,getmetatable,setmetatable
+local substr,insert,remove = string.sub,table.insert,table.remove
+
 local M = {}
 
 local function gcd(m, n)
@@ -44,6 +47,14 @@ M.index = function (T, V)
         if v == V then return k end
     end
     return nil
+end
+
+M.extend = function (T, E)
+    local i = #T + 1
+    for _,v in ipairs(E) do
+        T[i] = v
+        i = i + 1
+    end
 end
 
 M.findall = function (S, pat)
@@ -96,6 +107,58 @@ M.difference = function (A, B)
         end
     end
     return R
+end
+
+local function find_first(T, search)
+    local before, after, part, dir = 1, #T, 0, 0
+    while before <= after do
+        part = (after + before) // 2
+        if T[part] == search then
+            while part > before and T[part-1] == search do
+                part = part - 1
+            end
+            return part
+        elseif T[part] < search then
+            before,dir = part + 1, 0
+        else
+            after,dir = part - 1, -1
+        end
+    end
+    return part + dir
+end
+
+local function find_last(T, search)
+    local before, after, part, dir = 1, #T, 0, 0
+    while before <= after do
+        part = (after + before) // 2
+        if T[part] == search then
+            while part < after and T[part+1] == search do
+                part = part + 1
+            end
+            return part
+        elseif T[part] < search then
+            before,dir = part + 1, 0
+        else
+            after,dir = part - 1, -1
+        end
+    end
+    return part + dir
+end
+
+M.find_first = find_first
+M.find_last = find_last
+
+M.insert_sorted = function (T, e)
+    local pos = find_last(T, e) + 1
+    insert(T, pos, e)
+    return pos
+end
+
+M.remove_item = function (T, e)
+    local pos = find_first(T, e)
+    if pos > 0 and T[pos] == e then
+        remove(T, pos)
+    end
 end
 
 M.run_reduce_sum = function (stages, ...)
@@ -154,13 +217,28 @@ M.Point = Point
 
 local grid_mt = {}
 
+local function grid_ix (this, pt)
+    local x,y = pt[1] or pt.x, pt[2] or pt.y
+    if x < 1 or x > this.width or y < 1 or y > this.height then
+        return nil
+    end
+    return x + this.width*(y-1)
+end
+
+local function grid_pt (this, ix)
+    local y = (ix-1) // this.width
+    local x = ix - y*this.width
+    return x, y+1
+end
+
 grid_mt.__index = function (this, pt)
     if grid_mt[pt] then
         return grid_mt[pt]
     end
-    local x,y = pt[1] or pt.x, pt[2] or pt.y
-    local row = this.grid[y]
-    return row and row[x]
+    local ix = grid_ix(this, pt)
+    return ix and substr(this.grid, ix,ix)
+    --local row = this.grid[y]
+    --return row and row[x]
 end
 
 grid_mt.next = function (this, pos)
@@ -173,31 +251,44 @@ grid_mt.next = function (this, pos)
     else
         pos = Point(1, 1)
     end
-    if pos.y < 1 or pos.y > this.height or pos.x < 1 or pos.x > this.width then
-        return nil
-    end
-    return pos, this.grid[pos.y][pos.x]
+    --if pos.y < 1 or pos.y > this.height or pos.x < 1 or pos.x > this.width then
+    local ix = grid_ix(this, pos)
+    if not ix then return nil end
+    return pos, substr(this.grid, ix,ix)
+    --return pos, this.grid[pos.y][pos.x]
 end
 
 grid_mt.each = function (this)
     return grid_mt.next, this
 end
 
+grid_mt.find = function (this, pat, start, plain)
+    local ix = start and grid_ix(this, start) or 1
+    if not ix then return nil end
+    local x, y
+    local start_ix, stop_ix = string.find(this.grid, pat, ix, plain)
+    while start_ix do
+        x, y = grid_pt(this, start_ix)
+        if stop_ix - start_ix + x <= this.width then
+            break
+        end
+        start_ix, stop_ix = string.find(this.grid, pat, start_ix+1, plain)
+    end
+    if not start_ix then return nil end
+    return Point(x, y), Point(grid_pt(this, stop_ix))
+end
+
 M.Grid = function (input)
-    local substr = string.sub
-    local grid = {}
+    local rows = {}
     local width = 0
     for line in input:lines() do
-        row = {}
-        for i = 1, #line do
-            row[i] = substr(line, i,i)
+        if line == "" then break end
+        rows[#rows+1] = line
+        if #line > width then
+            width = #line
         end
-        if #row > width then
-            width = #row
-        end
-        grid[#grid+1] = row
     end
-    return setmetatable({grid=grid, height=#grid, width=width}, grid_mt)
+    return setmetatable({grid=table.concat(rows), height=#rows, width=width}, grid_mt)
 end
 
 return M

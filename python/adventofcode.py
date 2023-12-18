@@ -62,7 +62,7 @@ class Point:
 
     @property
     def j(self):
-        return self.h
+        return self.y
 
     @property
     def col(self):
@@ -92,6 +92,10 @@ class Point:
 
     def __sub__(self, other):
         return Point(self.x-other.x, self.y-other.y)
+
+    def __matmul__(self, matrix):
+        return Point(self.x*matrix[0][0] + self.y*matrix[0][1],
+                     self.x*matrix[1][0] + self.y*matrix[1][1])
 
 
 class Grid:
