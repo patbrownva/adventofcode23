@@ -31,6 +31,7 @@ class AdventOfCode:
     def read(self):
         for line in self.input:
             self.line(line)
+        self.input = None
         return self
 
     def reduce_lines(self, collector, initial=None):
@@ -92,6 +93,9 @@ class Point:
 
     def __sub__(self, other):
         return Point(self.x-other.x, self.y-other.y)
+
+    def __mul__(self, scale):
+        return Point(self.x*scale, self.y*scale)
 
     def __matmul__(self, matrix):
         return Point(self.x*matrix[0][0] + self.y*matrix[0][1],
