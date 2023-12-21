@@ -27,10 +27,14 @@ class AdventOfCode:
 
     def line(self, line):
         pass
+    
+    def finish(self):
+        pass
 
     def read(self):
         for line in self.input:
             self.line(line)
+        self.finish()
         self.input = None
         return self
 
