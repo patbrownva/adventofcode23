@@ -105,6 +105,9 @@ class Point:
         return Point(self.x*matrix[0][0] + self.y*matrix[0][1],
                      self.x*matrix[1][0] + self.y*matrix[1][1])
 
+    def distance(self, other):
+        return abs(self.x-other.x) + abs(self.y-other.y)
+
 
 class Grid:
     """General 2d grid of characters.
@@ -129,7 +132,7 @@ class Grid:
 
     def __getitem__(self, *args):
         if len(args) == 1:
-            x,y = args[1]
+            x,y = args[0]
         elif len(args) == 2:
             x,y = args
         else:
@@ -140,8 +143,8 @@ class Grid:
 
     def __setitem__(self, *args):
         if len(args) == 2:
-            x,y = args[1]
-            v = args[2]
+            x,y = args[0]
+            v = args[1]
         elif len(args) == 3:
             x,y,v = args
         else:
