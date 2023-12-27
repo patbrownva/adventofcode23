@@ -57,6 +57,20 @@ M.extend = function (T, E)
     end
 end
 
+M.split = function (S, pat)
+    local find = string.find
+    local R = {}
+    local start = 1
+    local indexl, indexr = find(S, pat)
+    while indexl do
+        R[#R+1] = substr(S, 1, indexl-1)
+        start = indexr + 1
+        indexl, indexr = find(S, pat, start)
+    end
+    R[#R+1] = substr(S, start)
+    return R
+end
+
 M.findall = function (S, pat)
     local R = {}
     for M in string.gmatch(S, pat) do
